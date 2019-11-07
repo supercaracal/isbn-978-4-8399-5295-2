@@ -1,49 +1,51 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define MAX_SIZE 20000
+#define MAX_SIZE 20002
 #define PLOT_DOWN '\\'
 #define PLOT_FLAT '_'
 #define PLOT_UP '/'
 
+typedef struct section { int j, size; } sec_t;
+
 int main(int argc, char **argv) {
   char buf[MAX_SIZE];
   char *ret;
-  char prev;
-  int i, j, depth, base;
-  double cap, offset, total;
-  double caps[MAX_SIZE / 2];
+  int i, j, m, n, total, sub;
+  int s1[MAX_SIZE];
+  sec_t tmp;
+  sec_t s2[MAX_SIZE / 2];
 
   ret = fgets(buf, MAX_SIZE, stdin);
   if (ret == NULL) exit(1);
 
-  for (i = j = depth = base = 0, cap = offset = total = 0.0, prev = '\0'; buf[i] != '\0'; prev = buf[i++]) {
-    if (prev != PLOT_DOWN && buf[i] == PLOT_DOWN && depth == 0) base = i;
+  for (i = m = n = total = 0; buf[i] != '\0'; ++i) {
     switch (buf[i]) {
       case PLOT_DOWN:
-        if (prev != PLOT_UP) ++depth;
-        offset = 0.5;
+        s1[m++] = i;
         break;
       case PLOT_UP:
-        if (prev == PLOT_UP) --depth;
-        offset = 0.5;
+        if (m < 1) break;
+        j = s1[--m];
+        total += i - j;
+        sub = i - j;
+        while (n > 0) {
+          tmp = s2[--n];
+          if (j > tmp.j) {
+            ++n;
+            break;
+          }
+          sub += tmp.size;
+        }
+        s2[n].j = j;
+        s2[n].size = sub;
+        n++;
         break;
-      case PLOT_FLAT:
-        offset = 0.0;
-        break;
-    }
-    if (depth > 0 && prev == PLOT_UP && buf[i] != PLOT_UP) {
-    }
-    if (depth > 0) cap += ((float) depth) * 1.0 - offset;
-    if (buf[i] == PLOT_UP && depth == 1) {
-      caps[j++] = cap;
-      total += cap;
-      cap = 0.0;
     }
   }
 
-  printf("%d\n%d", (int) total, j);
-  for (i = 0; i < j; ++i) printf(" %d", (int) caps[i]);
+  printf("%d\n%d", (int) total, n);
+  for (i = 0; i < n; ++i) printf(" %d", (int) s2[i].size);
   printf("\n");
   exit(0);
 }
