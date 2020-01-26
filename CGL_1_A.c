@@ -22,11 +22,10 @@ static vector_t multiple(vector_t v, double s) {
   return ret;
 }
 
-static point_t calc_x(line_t l, point_t p) {
+static point_t projection(line_t l, point_t p) {
   vector_t base = minus(l.p1, l.p0);
   double r = DOT(minus(p, l.p0), base) / NORM(base);
-  point_t x = plus(l.p0, multiple(base, r));
-  return x;
+  return plus(l.p0, multiple(base, r));
 }
 
 int main(int argc, char **argv) {
@@ -38,7 +37,7 @@ int main(int argc, char **argv) {
   scanf("%d", &q);
   for (i = 0; i < q; ++i) {
     scanf("%lf %lf", &p.x, &p.y);
-    p = calc_x(l, p);
+    p = projection(l, p);
     printf("%.10lf %.10lf\n", p.x, p.y);
   }
 }
